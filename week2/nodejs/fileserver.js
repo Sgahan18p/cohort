@@ -13,26 +13,54 @@ Example: GET http://localhost:3000/files
 Testing the server - run `npm run test-fileServer` command in terminal
 */
 
-const express = require('express');
 const fs = require('fs');
+const path = require('path');
+const express = require('express');
 const app = express();
 const port = 3000;
 
-function check(err, file){
-    if (err) {
-        res.status(500).json({ error: 'Failed to read directory' });
-        return;
+const directoryPath = 'C:/Users/sgaha/OneDrive/Desktop/cohort/week2/nodejs/files';
+
+function handleRequest(req,res){
+    fs.readdir(directoryPath, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: 'Unable to scan directory' });
+        }
+        res.json({ files: result });
+    });
+    
+}
+
+function read(name, res) {
+    const Path = path.join(directoryPath, name);
+    try {
+        if (!fs.existsSync(Path)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        return fs.readFileSync(Path, 'utf-8');
+    } catch (error) {
+        console.error('Error reading file:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
-    res.json({ files });
 }
 
-function handleRequest(req, res) {
-    const directoryPath = 'C:/Users/sgaha/OneDrive/Desktop/cohort/week2/nodejs/files';
-    fs.readdir(directoryPath, check);
-}
+function handleRequest1(req, res) {
+    var name = req.query.name;
 
+    if (!name) {
+        return res.status(400).json({ error: 'File name is required' });
+    }
+
+    var data = read(name, res);
+
+    if (data) {
+        res.json({ fileContent: data });
+    }
+}
 app.get('/file', handleRequest);
+app.get('/filename', handleRequest1);
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
