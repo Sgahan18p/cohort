@@ -1,0 +1,12 @@
+{
+  "name": "course_app",
+  "version": "1.0.0",
+  "description": "This is a full-stack course-selling platform where:\r - **Admins** can create, edit, and manage courses.\r - **Users** can sign up, browse, and purchase courses.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
