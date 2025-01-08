@@ -24,7 +24,8 @@ function adminAuthentication(req,res, next){
 }
 
 function userAuthentication(req,res, next){
-  const {username,password}=req.headers;
+  const username = req.headers['username'];
+  const password = req.headers['password'];
   console.log("username ",username," is authenticated ");
   const user=users.find(a=> a.username === username && a.password === password)
   if(user){
@@ -36,14 +37,13 @@ function userAuthentication(req,res, next){
 }
 
 function adminSignup(req,res){
-  const user = req.body
-  const userExist = users.find(u => u.username === user.username)
-  if(userExist) {
-    return res.status(403).json({message: "User already exists!"})
+  const admin = req.body
+  const adminExist = admins.find(u => u.username === admin.username)
+  if(adminExist) {
+    return res.status(403).json({message: "admin already exists!"})
   }else {
-    user["purchasedCourses"] = []
-    users.push(user)
-    res.status(200).json({message: "User created successfully."})
+    admins.push(admin)
+    res.status(200).json({message: "admin created successfully."})
   }
 }
 
@@ -53,18 +53,19 @@ function adminLogin(req,res){
 function adminCourses(req,res){
   const course =req.body;
   course.id =cID++;
+  courses.push(course);
   res.json({message:"course created successfully ", courseId:course.id});
 };
 
 function adminCoursesID(req, res ){
-const courseId=parseInt(req.params.courseId);
-const course=courses.find(c=> c.id === courseId)
-if(course){
-  Object.assign(course, req.body);
-  res.json({message :"course updated successfully "})
-}else{
-  res.status(404).json({message : " course not found "})
-}
+  const courseId = parseInt(req.params.courseId);
+  const course = courses.find(c => c.id === courseId);
+  if (course) {
+    Object.assign(course, req.body);
+    res.json({message: "course updated successfully"});
+  } else {
+    res.status(404).json({message: "course not found"});
+  }
 }
 
 function userSignup(req,res){
@@ -73,14 +74,16 @@ function userSignup(req,res){
   if(existingUser){
     res.status(403).json({message : "user already exists "});
   }else{
-    admins.push(users);
+    users.push(user);
     res.json({message : 'user created successsfully '});
   }
 }
-function userLogin(req,res){
-  res.json({message:"logged in successfully "})
+function userLogin(req, res) {
+  const username = req.headers['username'];
+  console.log(`User ${username} logged in successfully`);
+  res.json({message: "logged in successfully"});
 }
-function userCourses(req,res){
+function userCourses(req, res){
   let filteredCourses = [];
   for(let i=0; i<courses.length; i++){
     if(courses[i].published){
@@ -117,7 +120,7 @@ app.get('/admin/courses',adminAuthentication,(req,res)=>{
 app.post('/users/signup',userSignup )
 app.post('/users/login',userAuthentication,userLogin )
 app.get('/users/courses',userAuthentication,userCourses )
-app.post('/users/courses/:courseId',userAuthentication,userCoursesID )
+app.get('/users/purchasedCourses',userAuthentication,userPurchasedCourses )
 app.get('/users/purchedCourses',userAuthentication,userPurchasedCourses )
 
 
